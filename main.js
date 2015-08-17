@@ -10,7 +10,7 @@ var init = require("init");
 //var roleAct = require("roleAct");
 //var util = require("util");
 //
-//init();
+init();
 //
 //spawnMaintain();
 //

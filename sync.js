@@ -78,7 +78,7 @@ function schedulePush() {
                 'Content-Type': 'application/json; charset=utf-8'
             },
         });
-        console.log(JSON.stringify({ branch: branch, modules: modules }));
+        //console.log(JSON.stringify({ branch: branch, modules: modules }));
         req.end(JSON.stringify({ branch: branch, modules: modules }));
         req.on('response', function(res) {
             console.log('HTTP Status '+ res.statusCode);

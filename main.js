@@ -1,22 +1,13 @@
-/**
- * Created by jingzhe.feng on 2015-08-17.
- */
-if(Game.time%100 === 0) {
-    console.log(Game.time);
-}
+var performRoles = require('performRoles');
+var spawner = require('spawner');
+var countType = require('countType');
+var factory = require('factory');
 
-var init = require("init");
-//var spawnMaintain = require("spawnMaintain");
-//var roleAct = require("roleAct");
-//var util = require("util");
-//
-init();
-//
-//spawnMaintain();
-//
-//roleAct.run();
+factory.init();
+factory.run();
 
-if(Game.time%100 === 0) {
-    console.log("Gabage collection...");
-    util.gabageCollect();
-}
+spawner.spawnNextInQue();
+
+factory.buildArmyWhileIdle();
+
+performRoles(Game.creeps);

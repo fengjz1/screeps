@@ -5,14 +5,14 @@
  */
 var guard = {
 	parts: [
-		[Game.TOUGH, Game.MOVE, Game.ATTACK, Game.ATTACK]
+		[TOUGH, MOVE, ATTACK, ATTACK]
 	],
 
 	action: function()
 	{
 		var creep = this.creep;
 
-		var targets = creep.room.find(Game.HOSTILE_CREEPS);
+		var targets = creep.room.find(FIND_HOSTILE_CREEPS);
 		if (targets.length) {
 			creep.moveTo(targets[0]);
 			creep.attack(targets[0]);

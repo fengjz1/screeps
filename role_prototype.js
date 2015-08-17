@@ -46,13 +46,8 @@ var proto = {
 
 	getParts: function() {
 		var _ = require('lodash');
-
-		var extensions = Game.getRoom('1-1').find(Game.MY_STRUCTURES, {
-			filter: function(structure)
-			{
-				return (structure.structureType == Game.STRUCTURE_EXTENSION && structure.energy >= 200);
-			}
-		}).length;
+		var curRoom = Game.rooms[Memory.CURRENT_ROOM_NAME];
+		var energyAvailable = curRoom.energyAvailable;
 
 		var parts = _.cloneDeep(this.parts);
 		if(typeof parts[0] != "object")
@@ -62,10 +57,11 @@ var proto = {
 
 		for(var i in parts)
 		{
-			if((parts[i].length - 5) <= extensions) {
+			if (this.spawnCost(parts[i]) <= energyAvailable) {
 				return parts[i];
 			}
 		}
+		return null;
 	},
 
 	action: function() { },
@@ -87,7 +83,7 @@ var proto = {
 		var creep = this.creep;
 
 		var distance = 4;
-		var restTarget = creep.pos.findNearest(Game.MY_SPAWNS);
+		var restTarget = creep.pos.findNearest(FIND_MY_SPAWNS);
 
 		if(!civilian) {
 			var flags = Game.flags;
@@ -108,10 +104,10 @@ var proto = {
 //		if(flag !== undefined && civilian !== true && !creep.pos.inRangeTo(flag, distance) && !creep.pos.findPathTo(flag).length)
 //			restTarget = flag2;
 
-		if (creep.getActiveBodyparts(Game.HEAL)) {
+		if (creep.getActiveBodyparts(HEAL)) {
 //			distance = distance - 1;
 		}
-		else if (creep.getActiveBodyparts(Game.RANGED_ATTACK)) {
+		else if (creep.getActiveBodyparts(RANGED_ATTACK)) {
 //			distance = distance - 1;
 		}
 		if (creep.pos.findPathTo(restTarget).length > distance) {
@@ -127,7 +123,7 @@ var proto = {
 		var creep = this.creep;
 
 		if(!target)
-			target = creep.pos.findNearest(Game.HOSTILE_CREEPS);
+			target = creep.pos.findNearest(FIND_HOSTILE_CREEPS);
 
 		if(target) {
 			if (target.pos.inRangeTo(creep.pos, 3) ) {
@@ -142,7 +138,7 @@ var proto = {
 	{
 		var creep = this.creep;
 
-		var target = creep.pos.findNearest(Game.HOSTILE_CREEPS);
+		var target = creep.pos.findNearest(FIND_HOSTILE_CREEPS);
 		if(target !== null && target.pos.inRangeTo(creep.pos, 3))
 			creep.moveTo(creep.pos.x + creep.pos.x - target.pos.x, creep.pos.y + creep.pos.y - target.pos.y );
 	},
@@ -172,10 +168,10 @@ var proto = {
 	{
 		var creep = this.creep;
 
-		var closeArchers = creep.pos.findNearest(Game.HOSTILE_CREEPS, {
+		var closeArchers = creep.pos.findNearest(FIND_HOSTILE_CREEPS, {
 			filter: function(enemy)
 			{
-				return enemy.getActiveBodyparts(Game.RANGED_ATTACK) > 0
+				return enemy.getActiveBodyparts(RANGED_ATTACK) > 0
 					&& creep.pos.inRangeTo(enemy, 3);
 			}
 		});
@@ -183,11 +179,11 @@ var proto = {
 		if(closeArchers != null)
 			return closeArchers;
 
-		var closeMobileMelee = creep.pos.findNearest(Game.HOSTILE_CREEPS, {
+		var closeMobileMelee = creep.pos.findNearest(FIND_HOSTILE_CREEPS, {
 			filter: function(enemy)
 			{
-				return enemy.getActiveBodyparts(Game.ATTACK) > 0
-					&& enemy.getActiveBodyparts(Game.MOVE) > 0
+				return enemy.getActiveBodyparts(ATTACK) > 0
+					&& enemy.getActiveBodyparts(MOVE) > 0
 					&& creep.pos.inRangeTo(enemy, 3);
 			}
 		});
@@ -195,11 +191,11 @@ var proto = {
 		if(closeMobileMelee != null)
 			return closeMobileMelee;
 
-		var closeHealer = creep.pos.findNearest(Game.HOSTILE_CREEPS, {
+		var closeHealer = creep.pos.findNearest(FIND_HOSTILE_CREEPS, {
 			filter: function(enemy)
 			{
-				return enemy.getActiveBodyparts(Game.HEAL) > 0
-					&& enemy.getActiveBodyparts(Game.MOVE) > 0
+				return enemy.getActiveBodyparts(HEAL) > 0
+					&& enemy.getActiveBodyparts(MOVE) > 0
 					&& creep.pos.inRangeTo(enemy, 3);
 			}
 		});
@@ -207,8 +203,48 @@ var proto = {
 		if(closeHealer != null)
 			return closeHealer;
 
-		return creep.pos.findNearest(Game.HOSTILE_CREEPS);
-	}
+		return creep.pos.findNearest(FIND_HOSTILE_CREEPS);
+	},
+
+	spawnCost: function (bodyParts) {
+		var parts = bodyParts;
+
+		var total = 0;
+		for (var index in parts) {
+			var part = parts[index];
+			switch (part) {
+				case MOVE:
+					total += 50;
+					break;
+
+				case WORK:
+					total += 100;
+					break;
+
+				case CARRY:
+					total += 50;
+					break;
+
+				case ATTACK:
+					total += 80;
+					break;
+
+				case RANGED_ATTACK:
+					total += 150;
+					break;
+
+				case HEAL:
+					total += 250;
+					break;
+
+				case TOUGH:
+					total += 10;
+					break;
+			}
+		}
+
+		return total;
+	},
 };
 
 module.exports = proto;

@@ -23,7 +23,7 @@ module.exports =
 		if(!Memory.spawnQue.length) 
 			return;
 
-		var spawns = Game.getRoom('1-1').find(Game.MY_SPAWNS, {
+		var spawns = Game.spawns.Spawn1.room.find(FIND_MY_SPAWNS, {
 			filter: function(spawn)
 			{
 				return spawn.spawning === undefined || spawn.spawning === null;
@@ -51,11 +51,14 @@ module.exports =
 
 		toSpawnAt = toSpawnAt[0];
 
-		this.spawn(role.type, role.memory, toSpawnAt);
-
-		Memory.spawnQue.shift();
+		if (this.spawn(role.type, role.memory, toSpawnAt)) {
+			Memory.spawnQue.shift();
+		}
 	},
 
+	/*
+	 returns: name of spawned creep, or null
+	 */
 	spawn: function(role, memory, spawnPoint)
 	{
 		if(!spawnPoint)
@@ -64,11 +67,6 @@ module.exports =
 		var manager = require('roleManager');
 
 		if(!manager.roleExists(role))
-		{
-			return;
-		}
-
-		if(!this.canSpawn(spawnPoint, role))
 		{
 			return;
 		}
@@ -88,65 +86,18 @@ module.exports =
 				name = tryName;
 		}
 
-		console.log('Spawning ' + role);
-		spawnPoint.createCreep(manager.getRoleBodyParts(role), name, memory);
+		var bodyParts = manager.getRoleBodyParts(role);
+		if (bodyParts) {
+			console.log("spawning creep:" + role + ", name:" + name + ", body:" + bodyParts);
+			return spawnPoint.createCreep(bodyParts, name, memory);
+		}
+		return null;
 	},
 
 	canSpawn: function(spawnPoint, role)
 	{
-		if(typeof spawnPoint == "string" && role == undefined)
-		{
-			role = spawnPoint;
-			spawnPoint = Game.spawns.Spawn1;
-		}
-
-		return spawnPoint.energy >= this.spawnCost(role)
-			&& (spawnPoint.spawning == null
-				|| spawnPoint.spawning == undefined);
-	},
-
-	spawnCost: function(role)
-	{
-		var manager = require('roleManager');
-		var parts = manager.getRoleBodyParts(role);
-
-		var total = 0;
-		for(var index in parts)
-		{
-			var part = parts[index];
-			switch(part)
-			{
-				case Game.MOVE:
-					total += 50
-					break;
-
-				case Game.WORK:
-					total += 20
-					break;
-
-				case Game.CARRY:
-					total += 50
-					break;
-
-				case Game.ATTACK:
-					total += 100
-					break;
-
-				case Game.RANGED_ATTACK:
-					total += 150
-					break;
-
-				case Game.HEAL:
-					total += 200
-					break;
-
-				case Game.TOUGH:
-					total += 5
-					break;
-			}
-		}
-
-		return total;
+		return spawnPoint.spawning == null
+			|| spawnPoint.spawning == undefined;
 	},
 
 	killAll: function(role)

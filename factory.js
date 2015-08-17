@@ -26,6 +26,7 @@ module.exports ={
 		{
 			Memory.requiredScreeps = [
 				//Survival
+				'harvester',
 				'miner', //1
 				'archer', //1
 				'miner', //2

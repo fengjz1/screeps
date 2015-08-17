@@ -4,26 +4,26 @@
  */
 var builder = {
 	parts: [
-		[Game.WORK,Game.WORK,Game.CARRY,Game.CARRY,Game.MOVE],
-//		[Game.WORK,Game.WORK,Game.CARRY,Game.CARRY,Game.MOVE, Game.MOVE, Game.CARRY],
-//		[Game.WORK,Game.WORK,Game.CARRY,Game.CARRY,Game.MOVE, Game.MOVE, Game.CARRY, Game.MOVE],
-//		[Game.WORK,Game.WORK,Game.CARRY,Game.CARRY,Game.MOVE, Game.MOVE, Game.CARRY, Game.MOVE, Game.WORK],
-//		[Game.WORK,Game.WORK,Game.CARRY,Game.CARRY,Game.MOVE, Game.MOVE, Game.CARRY, Game.MOVE, Game.WORK, Game.MOVE],
-//		[Game.WORK,Game.WORK,Game.CARRY,Game.CARRY,Game.MOVE, Game.MOVE, Game.CARRY, Game.MOVE, Game.WORK, Game.MOVE, Game.CARRY]
+		[WORK, WORK, CARRY, MOVE],
+		[WORK, WORK, CARRY, CARRY, MOVE, MOVE, CARRY],
+		[WORK, WORK, CARRY, CARRY, MOVE, MOVE, CARRY, MOVE],
+		[WORK, WORK, CARRY, CARRY, MOVE, MOVE, CARRY, MOVE, WORK],
+		[WORK, WORK, CARRY, CARRY, MOVE, MOVE, CARRY, MOVE, WORK, MOVE],
+		[WORK, WORK, CARRY, CARRY, MOVE, MOVE, CARRY, MOVE, WORK, MOVE, CARRY]
 	],
 
 //	getParts: function()
 //	{
 //		var _= require('lodash');
 //
-//		var partsAllowed = Game.getRoom('1-1').find(Game.MY_STRUCTURES, {
+//		var partsAllowed = Game.spawns.Spawn1.room.find(FIND_MY_STRUCTURES, {
 //			filter: function(structure)
 //			{
-//				return (structure.structureType == Game.STRUCTURE_EXTENSION && structure.energy >= 200);
+//				return (structure.structureType == STRUCTURE_EXTENSION && structure.energy >= 200);
 //			}
 //		}).length;
 //
-//		var parts = [ Game.WORK, Game.WORK, Game.WORK, Game.CARRY, Game.MOVE ];
+//		var parts = [ WORK, WORK, WORK, CARRY, MOVE ];
 //		var modulo = partsAllowed % 2;
 //		partsAllowed -= modulo;
 //		partsAllowed /= 2;
@@ -32,7 +32,7 @@ var builder = {
 //			partsAllowed = 5;
 //
 //		for(var i = 0; i < partsAllowed; i++)
-//			parts.push(Game.MOVE, Game.CARRY);
+//			parts.push(MOVE, CARRY);
 //
 //		return parts;
 //
@@ -44,8 +44,8 @@ var builder = {
 		var creep = this.creep;
 
 		//If out of energy, go to spawn and recharge
-		if(creep.energy == 0) {
-			var closestSpawn = creep.pos.findNearest(Game.MY_SPAWNS, {
+		if (creep.carry.energy == 0) {
+			var closestSpawn = creep.pos.findNearest(FIND_MY_SPAWNS, {
 				filter: function(spawn)
 				{
 					return spawn.energy > 0 && creep.pos.inRangeTo(spawn, 3);
@@ -61,7 +61,7 @@ var builder = {
 			//First, we're going to check for damaged ramparts. We're using ramparts as the first line of defense
 			//and we want them nicely maintained. This is especially important when under attack. The builder will
 			//repair the most damaged ramparts first
-			var structures = creep.room.find(Game.STRUCTURES);
+			var structures = creep.room.find(FIND_STRUCTURES);
 			var damagedRamparts = [ ];
 
 			for(var index in structures)
@@ -86,7 +86,7 @@ var builder = {
 
 			//Next we're going to look for general buildings that have less than 50% health, and we'll go to repair those.
 			//We set it at 50%, because we don't want builders abandoning their duty every time a road gets walked on
-			var halfBroken = creep.room.find(Game.STRUCTURES);
+			var halfBroken = creep.room.find(STRUCTURES);
 			var toRepair = [ ];
 			for(var index in halfBroken)
 				if((halfBroken[index].hits / halfBroken[index].hitsMax) < 0.5)
@@ -102,7 +102,7 @@ var builder = {
 			}
 
 			//If no repairs are needed, we're just going to go find some structures to build
-			var targets = creep.pos.findNearest(Game.CONSTRUCTION_SITES);
+			var targets = creep.pos.findNearest(FIND_CONSTRUCTION_SITES);
 			if(targets) {
 
 				if(!creep.pos.isNearTo(targets))

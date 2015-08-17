@@ -4,19 +4,19 @@
  */
 var harvester = {
 	parts: [
-		[Game.MOVE, Game.MOVE, Game.CARRY, Game.WORK]
+		[MOVE, MOVE, CARRY, WORK]
 	],
 
 	action: function () {
 		var creep = this.creep;
 
-		if(creep.energy < creep.energyCapacity) {
-			var sources = creep.pos.findNearest(Game.SOURCES);
+		if (creep.carry.energy < creep.carryCapacity) {
+			var sources = creep.pos.findClosest(FIND_SOURCES);
 			creep.moveTo(sources);
 			creep.harvest(sources);
 		}
 		else {
-			var target = creep.pos.findNearest(Game.MY_SPAWNS);
+			var target = creep.pos.findClosest(FIND_MY_SPAWNS);
 
 			creep.moveTo(target);
 			creep.transferEnergy(target);

@@ -2,24 +2,24 @@ var proto = require('role_prototype');
 
 var archer = {
 	parts: [
-		[Game.RANGED_ATTACK, Game.RANGED_ATTACK, Game.MOVE, Game.MOVE],
-		[Game.RANGED_ATTACK, Game.RANGED_ATTACK, Game.RANGED_ATTACK, Game.MOVE, Game.MOVE, Game.MOVE],
-		[Game.RANGED_ATTACK, Game.RANGED_ATTACK, Game.RANGED_ATTACK, Game.RANGED_ATTACK, Game.MOVE, Game.MOVE, Game.MOVE, Game.MOVE],
-		[Game.RANGED_ATTACK, Game.RANGED_ATTACK, Game.RANGED_ATTACK, Game.RANGED_ATTACK, Game.RANGED_ATTACK, Game.MOVE, Game.MOVE, Game.MOVE, Game.MOVE, Game.MOVE],
+		[RANGED_ATTACK, RANGED_ATTACK, MOVE, MOVE],
+		[RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, MOVE, MOVE, MOVE],
+		[RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, MOVE, MOVE, MOVE, MOVE],
+		[RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, MOVE, MOVE, MOVE, MOVE, MOVE],
 	],
 
 	/**
 	 * Here we want Archer to automatically scale to however many extensions we have
 	 * @returns {Array}
 	 */
-	getParts: function()
+	/*getParts: function()
 	{
 		var _= require('lodash');
 
-		var partsAllowed = Game.getRoom('1-1').find(Game.MY_STRUCTURES, {
+	 var partsAllowed = Game.spawns.Spawn1.room.find(FIND_MY_STRUCTURES, {
 			filter: function(structure)
 			{
-				return (structure.structureType == Game.STRUCTURE_EXTENSION && structure.energy >= 200);
+	 return (structure.structureType == STRUCTURE_EXTENSION && structure.energy >= 200);
 			}
 		}).length;
 		partsAllowed += 5;
@@ -33,12 +33,12 @@ var archer = {
 
 		var parts = [ ];
 		for(var i = 0; i < partsAllowed; i++) {
-			parts.unshift(Game.RANGED_ATTACK);
-			parts.push(Game.MOVE);
+	 parts.unshift(RANGED_ATTACK);
+	 parts.push(MOVE);
 		}
 
 		return parts;
-	},
+	 },*/
 
 	/**
 	 * @TODO: We need to get archers to prioritise their targets better

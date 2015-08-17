@@ -45,7 +45,7 @@ var builder = {
 
 		//If out of energy, go to spawn and recharge
 		if (creep.carry.energy == 0) {
-			var closestSpawn = creep.pos.findNearest(FIND_MY_SPAWNS, {
+			var closestSpawn = creep.pos.findClosest(FIND_MY_SPAWNS, {
 				filter: function(spawn)
 				{
 					return spawn.energy > 0 && creep.pos.inRangeTo(spawn, 3);
@@ -102,7 +102,7 @@ var builder = {
 			}
 
 			//If no repairs are needed, we're just going to go find some structures to build
-			var targets = creep.pos.findNearest(FIND_CONSTRUCTION_SITES);
+			var targets = creep.pos.findClosest(FIND_CONSTRUCTION_SITES);
 			if(targets) {
 
 				if(!creep.pos.isNearTo(targets))

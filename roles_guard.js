@@ -5,14 +5,21 @@
  */
 var guard = {
 	parts: [
-		[TOUGH, MOVE, ATTACK, ATTACK]
+        [TOUGH, ATTACK, ATTACK, MOVE]
 	],
 
 	action: function()
 	{
 		var creep = this.creep;
 
-		var targets = creep.room.find(FIND_HOSTILE_CREEPS);
+        var targets = creep.room.find(FIND_HOSTILE_CREEPS, {
+            filter: function (i) {
+                if (i.owner.username == 'Source Keeper') {
+                    return false;
+                }
+                return true;
+            }
+        });
 		if (targets.length) {
 			creep.moveTo(targets[0]);
 			creep.attack(targets[0]);

@@ -4,7 +4,7 @@
  */
 var harvester = {
 	parts: [
-		[MOVE, MOVE, CARRY, WORK]
+		[MOVE, CARRY, WORK, WORK]
 	],
 
 	action: function () {

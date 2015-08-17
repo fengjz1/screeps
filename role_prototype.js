@@ -83,7 +83,7 @@ var proto = {
 		var creep = this.creep;
 
 		var distance = 4;
-		var restTarget = creep.pos.findNearest(FIND_MY_SPAWNS);
+		var restTarget = creep.pos.findClosest(FIND_MY_SPAWNS);
 
 		if(!civilian) {
 			var flags = Game.flags;
@@ -123,7 +123,7 @@ var proto = {
 		var creep = this.creep;
 
 		if(!target)
-			target = creep.pos.findNearest(FIND_HOSTILE_CREEPS);
+			target = creep.pos.findClosest(FIND_HOSTILE_CREEPS);
 
 		if(target) {
 			if (target.pos.inRangeTo(creep.pos, 3) ) {
@@ -138,7 +138,7 @@ var proto = {
 	{
 		var creep = this.creep;
 
-		var target = creep.pos.findNearest(FIND_HOSTILE_CREEPS);
+		var target = creep.pos.findClosest(FIND_HOSTILE_CREEPS);
 		if(target !== null && target.pos.inRangeTo(creep.pos, 3))
 			creep.moveTo(creep.pos.x + creep.pos.x - target.pos.x, creep.pos.y + creep.pos.y - target.pos.y );
 	},
@@ -168,9 +168,12 @@ var proto = {
 	{
 		var creep = this.creep;
 
-		var closeArchers = creep.pos.findNearest(FIND_HOSTILE_CREEPS, {
+		var closeArchers = creep.pos.findClosest(FIND_HOSTILE_CREEPS, {
 			filter: function(enemy)
 			{
+				if (enemy.owner.username != 'Source Keeper') {
+					return false;
+				}
 				return enemy.getActiveBodyparts(RANGED_ATTACK) > 0
 					&& creep.pos.inRangeTo(enemy, 3);
 			}
@@ -179,7 +182,7 @@ var proto = {
 		if(closeArchers != null)
 			return closeArchers;
 
-		var closeMobileMelee = creep.pos.findNearest(FIND_HOSTILE_CREEPS, {
+		var closeMobileMelee = creep.pos.findClosest(FIND_HOSTILE_CREEPS, {
 			filter: function(enemy)
 			{
 				return enemy.getActiveBodyparts(ATTACK) > 0
@@ -191,7 +194,7 @@ var proto = {
 		if(closeMobileMelee != null)
 			return closeMobileMelee;
 
-		var closeHealer = creep.pos.findNearest(FIND_HOSTILE_CREEPS, {
+		var closeHealer = creep.pos.findClosest(FIND_HOSTILE_CREEPS, {
 			filter: function(enemy)
 			{
 				return enemy.getActiveBodyparts(HEAL) > 0
@@ -203,7 +206,7 @@ var proto = {
 		if(closeHealer != null)
 			return closeHealer;
 
-		return creep.pos.findNearest(FIND_HOSTILE_CREEPS);
+		return creep.pos.findClosest(FIND_HOSTILE_CREEPS);
 	},
 
 	spawnCost: function (bodyParts) {

@@ -7,17 +7,30 @@
 var miner = {
 	parts: [
 		[MOVE, WORK, WORK],
-		[MOVE, WORK, WORK, WORK, WORK],
-		[MOVE, WORK, WORK, WORK, WORK, WORK]
+        [MOVE, WORK, WORK, WORK],
+        [MOVE, MOVE, WORK, WORK, WORK, WORK],
+        [MOVE, MOVE, WORK, WORK, WORK, WORK, WORK, WORK]
 	],
 
 	getOpenSource: function()
 	{
 		var creep = this.creep;
 
-		var source = creep.pos.findNearest(FIND_SOURCES, {
+        var source = creep.pos.findClosest(FIND_SOURCES, {
 			filter: function(source)
 			{
+                var sourceKeepers = source.pos.findInRange(FIND_HOSTILE_STRUCTURES, 10, {
+                    filter: function (i) {
+                        if (i.owner.username == 'Source Keeper') {
+                            return true;
+                        }
+                        return false;
+                    }
+                }).length;
+                if (sourceKeepers) {
+                    return false;
+                }
+
 				if(Memory.sources[source.id] == undefined || Memory.sources[source.id].miner == undefined || Memory.sources[source.id].miner == creep.id)
 					return true;
 
@@ -44,7 +57,7 @@ var miner = {
 		Memory.sources[source.id].miner = creep.id;
 		creep.memory.source = source.id;
 
-		var helperSpawn = source.pos.findNearest(FIND_MY_SPAWNS);
+        var helperSpawn = source.pos.findClosest(FIND_MY_SPAWNS);
 		var steps = helperSpawn.pos.findPathTo(source).length * 2;
 		var creepsNeeded = Math.round((steps * 8) / 100);
 

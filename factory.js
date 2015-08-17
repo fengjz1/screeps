@@ -27,31 +27,31 @@ module.exports ={
 			Memory.requiredScreeps = [
 				//Survival
 				'harvester',
+				'guard', //1
 				'miner', //1
-				'archer', //1
 				'miner', //2
-				'archer', //2
+				'guard', //2
 				'healer', //1
-				'archer', //3
+				'guard', //3
 				'miner', //3
 				'builder',
 				'transporter',
 				'transporter',
-				'archer', //4
+				'guard', //4
 				'healer', //2
-				'archer', //5
-				'archer', //6
+				'guard', //5
+				'guard', //6
 				'miner', //4
-				'archer', //7
-				'archer', //8
-				'archer', //9
+				'guard', //7
+				'guard', //8
+				'guard', //9
 				'healer', //3
 				'miner', //5
 				'builder',
 				'transporter',
 				'transporter',
-				'archer', //10
-				'archer', //11
+				'guard', //10
+				'guard', //11
 				'healer' //4
 
 				//Tutorial

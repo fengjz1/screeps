@@ -7,7 +7,7 @@ var scavenger = {
 	{
 		var creep = this.creep;
 
-		var droppedEnergy = creep.pos.findNearest(FIND_DROPPED_ENERGY, {
+		var droppedEnergy = creep.pos.findClosest(FIND_DROPPED_ENERGY, {
 			filter: function(en) {
 				var pickup = true;
 				var tile = creep.room.lookAt(en);
@@ -23,7 +23,7 @@ var scavenger = {
 
 		if (droppedEnergy == null || creep.carry.energy == creep.carryCapacity)
 		{
-			var nearestSpawn = creep.pos.findNearest(FIND_MY_SPAWNS, {
+			var nearestSpawn = creep.pos.findClosest(FIND_MY_SPAWNS, {
 				filter: function(spawn)
 				{
 					return spawn.energy < spawn.energyCapacity;

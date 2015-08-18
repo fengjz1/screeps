@@ -86,7 +86,7 @@ var builder = {
 
 			//Next we're going to look for general buildings that have less than 50% health, and we'll go to repair those.
 			//We set it at 50%, because we don't want builders abandoning their duty every time a road gets walked on
-            var halfBroken = creep.room.find(FIND_MY_STRUCTURES);
+            var halfBroken = creep.room.find(FIND_STRUCTURES);
 			var toRepair = [ ];
 			for(var index in halfBroken)
 				if((halfBroken[index].hits / halfBroken[index].hitsMax) < 0.5)

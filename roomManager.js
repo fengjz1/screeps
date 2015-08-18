@@ -8,38 +8,72 @@ module.exports = {
 
         //build rest flag
         if (!curRoom.memory.restFlagSet) {
-            var exits = curRoom.find(FIND_EXIT);
-            for (var idx in exits) {
-                var pos;
-                if (exits[idx].x == 0) {
-                    pos = curRoom.getPositionAt(exits[idx].x + 2, exits[idx].y);
-                }
-                if (exits[idx].y == 0) {
-                    pos = curRoom.getPositionAt(exits[idx].x, exits[idx].y + 2);
-                }
-                if (exits[idx].x == 49) {
-                    pos = curRoom.getPositionAt(exits[idx].x - 2, exits[idx].y);
-                }
-                if (exits[idx].y == 49) {
-                    pos = curRoom.getPositionAt(exits[idx].x, exits[idx].y - 2);
-                }
-                var look = curRoom.lookAt(pos);
-                var hasRestFlag = false;
-                look.forEach(function (lookObject) {
-                    if (lookObject.type == 'flag' && lookObject.flag.color == COLOR_YELLOW) {
-                        hasRestFlag = true;
+            //clear
+            var oldFlags = curRoom.find(FIND_FLAGS, {
+                filter: {color: COLOR_YELLOW}
+            });
+            oldFlags.forEach(function (obj) {
+                obj.remove();
+            });
+            if (oldFlags.length == 0) {    //create after delete, avoid detecting deleted flags
+                //add
+                var exits = curRoom.find(FIND_EXIT);
+                for (var idx in exits) {
+                    var pos;
+                    var distance = 3;
+                    if (exits[idx].x == 0) {
+                        pos = curRoom.getPositionAt(exits[idx].x + distance, exits[idx].y);
                     }
-                });
-                if (!hasRestFlag)
-                    curRoom.createFlag(pos, null, COLOR_YELLOW);
+                    if (exits[idx].y == 0) {
+                        pos = curRoom.getPositionAt(exits[idx].x, exits[idx].y + distance);
+                    }
+                    if (exits[idx].x == 49) {
+                        pos = curRoom.getPositionAt(exits[idx].x - distance, exits[idx].y);
+                    }
+                    if (exits[idx].y == 49) {
+                        pos = curRoom.getPositionAt(exits[idx].x, exits[idx].y - distance);
+                    }
+                    var look = curRoom.lookAt(pos);
+                    var canRestFlag = true;
+                    look.forEach(function (lookObject) {
+                        if (lookObject.type == 'flag' && lookObject.flag.color == COLOR_YELLOW) {
+                            canRestFlag = false;
+                        }
+                        if (lookObject.type == "terrain" && lookObject.terrain != "plain") {
+                            canRestFlag = false;
+                        }
+                        if (lookObject.type == "constructionSite") {
+                            canRestFlag = false;
+                        }
+                    });
+                    //detect if too close to wall, do not flag, avoid blocking paths
+                    if (canRestFlag) {
+                        var areaObjs = curRoom.lookForAtArea("terrain", pos.y - 2, pos.x - 2, pos.y + 2, pos.x + 2);
+                        for (var i in areaObjs) {
+                            for (var j in areaObjs[i]) {
+                                if (areaObjs[i][j]) {
+                                    areaObjs[i][j].forEach(function (tmpObj) {
+                                        if (tmpObj == "wall") canRestFlag = false;
+                                    });
+                                }
+                                if (!canRestFlag) break;
+                            }
+                            if (!canRestFlag) break;
+                        }
+                    }
+
+                    if (canRestFlag)
+                        curRoom.createFlag(pos, null, COLOR_YELLOW);
+                }
+                curRoom.memory.restFlagSet = true;
             }
-            curRoom.memory.restFlagSet = true;
         }
 
-        //try build extensions every 100 ticks
+        //try construction every 100 ticks
         if (Game.time % 100 == 0) {
             var constructionPlanner = require('constructionPlanner');
             constructionPlanner.buildExtentions();
+            constructionPlanner.buildWalls();
         }
     },
 

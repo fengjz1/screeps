@@ -6,6 +6,7 @@ var transporter = {
 	action: function()
 	{
 		var creep = this.creep;
+        var curRoom = Game.rooms[Memory.CURRENT_ROOM_NAME];
 
 		//@TODO: Balance Spawns here
 
@@ -24,7 +25,7 @@ var transporter = {
 				if (drops.length > 0) {
 					creep.moveTo(drops[0]);
 					creep.pickup(drops[0]);
-				} else {
+                } else if (curRoom.memory.spawnQue.length <= 0) {	//Do not build anything when spawning units
 					creep.moveTo(closestSpawn);
 					closestSpawn.transferEnergy(creep);
 				}
@@ -52,7 +53,7 @@ var transporter = {
 			var builderToHelp = creep.pos.findClosest(FIND_MY_CREEPS, {
 				filter: function (builder) {
 					return builder.memory.role == "builder"
-						&& builder.carry.energy < ( builder.carryCapacity - 10);
+                        && builder.carry.energy / builder.carryCapacity < 0.5;
 				}
 			});
 
@@ -72,8 +73,13 @@ var transporter = {
 		}
 
 		//Go to target and give it energy
+
 		if (creep.pos.isNearTo(target)) {
-			if (target.carry.energy < target.carryCapacity) {
+            if (target.structureType) {	//is structure
+                if (target.energy < target.energyCapacity) {
+                    creep.transferEnergy(target);
+                }
+            } else if (target.carry.energy < target.carryCapacity) {
 				creep.transferEnergy(target);
 			}
 		}

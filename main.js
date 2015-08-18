@@ -1,3 +1,7 @@
+if (Game.time % 100 == 0) {
+    console.log(Game.time);
+}
+
 var performRoles = require('performRoles');
 var spawner = require('spawner');
 var roomManager = require('roomManager');

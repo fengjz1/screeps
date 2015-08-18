@@ -22,17 +22,22 @@ module.exports = {
 			var rightUpPos = [spawn.pos.x + circle, spawn.pos.y - circle];
 			var rightDownPos = [spawn.pos.x + circle, spawn.pos.y + circle];
 			var leftDownPos = [spawn.pos.x - circle, spawn.pos.y + circle];
+			var pos;
 			for (var x = leftUpPos[0]; x <= rightUpPos[0]; x += 2) {
-				if (x >= 0 && leftUpPos[1] >= 0) curRoom.createConstructionSite(x, leftUpPos[1], STRUCTURE_EXTENSION);
+				pos = [x, leftUpPos[1]];
+				this.innerBuildExtension(curRoom, pos);
 			}
 			for (var y = rightUpPos[1]; y <= rightDownPos[1]; y += 2) {
-				if (y >= 0 && rightUpPos[0] >= 0) curRoom.createConstructionSite(rightUpPos[0], y, STRUCTURE_EXTENSION);
+				pos = [rightUpPos[0], y];
+				this.innerBuildExtension(curRoom, pos);
 			}
 			for (var x = rightDownPos[0]; x >= leftDownPos[0]; x -= 2) {
-				if (x >= 0 && rightDownPos[1] >= 0) curRoom.createConstructionSite(x, rightDownPos[1], STRUCTURE_EXTENSION);
+				pos = [x, rightDownPos[1]];
+				this.innerBuildExtension(curRoom, pos);
 			}
 			for (var y = leftDownPos[1]; y < leftUpPos[1]; y -= 2) {
-				if (y >= 0 && leftDownPos[0] >= 0) curRoom.createConstructionSite(leftDownPos[0], y, STRUCTURE_EXTENSION);
+				pos = [leftDownPos[0], y];
+				this.innerBuildExtension(curRoom, pos);
 			}
 			extension_sites = curRoom.find(FIND_CONSTRUCTION_SITES, {
 				filter: {structureType: STRUCTURE_EXTENSION}
@@ -40,6 +45,26 @@ module.exports = {
 			existExts = extensions.length + extension_sites.length;
 			if (existExts >= RCL_EXTS[curRoom.controller.level]) return;
 		}
+	},
+
+	innerBuildExtension: function (room, pos) {
+		if (pos.x >= 4 && pos.x <= 45 && pos.y >= 0 && pos.y <= 45)
+			room.createConstructionSite(pos.x, pos.y, STRUCTURE_EXTENSION);
+	},
+
+	buildWalls: function () {
+		var curRoom = Game.rooms[Memory.CURRENT_ROOM_NAME];
+
+		if (!curRoom.controller || curRoom.controller.level < 2) return;
+		var exits = curRoom.find(FIND_EXIT);
+		for (var i in exits) {
+			var exit = exits[i];
+			if (exit.x == 0) curRoom.createConstructionSite(exit.x + 2, exit.y, STRUCTURE_WALL);
+			if (exit.y == 0) curRoom.createConstructionSite(exit.x, exit.y + 2, STRUCTURE_WALL);
+			if (exit.x == 49) curRoom.createConstructionSite(exit.x - 2, exit.y, STRUCTURE_WALL);
+			if (exit.y == 49) curRoom.createConstructionSite(exit.x, exit.y - 2, STRUCTURE_WALL);
+		}
+
 	},
 
 	buildRoads: function(from, to)

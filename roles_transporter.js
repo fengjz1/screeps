@@ -14,24 +14,56 @@ var transporter = {
 			var closestSpawn = creep.pos.findClosest(FIND_MY_SPAWNS, {
 				filter: function(spawn)
 				{
-					return spawn.energy > 0;
+					return spawn.energy > creep.carryCapacity;
 				}
 			});
 
-			creep.moveTo(closestSpawn);
-			closestSpawn.transferEnergy(creep);
+			//pickup dropped energy near spawn
+			if (closestSpawn) {
+				var drops = closestSpawn.pos.findInRange(FIND_DROPPED_ENERGY, 1);
+				if (drops.length > 0) {
+					creep.moveTo(drops[0]);
+					creep.pickup(drops[0]);
+				} else {
+					creep.moveTo(closestSpawn);
+					closestSpawn.transferEnergy(creep);
+				}
+			}
 
 			return;
 		}
 
 		var target = null;
 
+		if (!target) {
+			var extension = creep.pos.findClosest(FIND_MY_STRUCTURES, {
+				filter: function (structure) {
+					return structure.structureType == STRUCTURE_EXTENSION &&
+						structure.energy < structure.energyCapacity;
+				}
+			});
+
+			if (extension)
+				target = extension;
+		}
+
 		//Transfer to builder
 		if (!target) {
 			var builderToHelp = creep.pos.findClosest(FIND_MY_CREEPS, {
 				filter: function (builder) {
 					return builder.memory.role == "builder"
-						&& builder.energy < ( builder.energyCapacity - 10);
+						&& builder.carry.energy < ( builder.carryCapacity - 10);
+				}
+			});
+
+			if (builderToHelp)
+				target = builderToHelp;
+		}
+		if (!target) {
+			var builderToHelp = creep.pos.findClosest(FIND_MY_CREEPS, {
+				filter: function (builder) {
+					return builder.memory.role == "ctl_builder"
+						&& builder.carry.energy < ( builder.carryCapacity - 10);
 				}
 			});
 
@@ -39,23 +71,9 @@ var transporter = {
 				target = builderToHelp;
 		}
 
-		if(!target)
-		{
-			var extension = creep.pos.findClosest(FIND_MY_STRUCTURES, {
-				filter: function(structure)
-				{
-					return structure.structureType == STRUCTURE_EXTENSION &&
-						structure.energy < structure.energyCapacity;
-				}
-			});
-
-			if(extension)
-				target = extension;
-		}
-
 		//Go to target and give it energy
 		if (creep.pos.isNearTo(target)) {
-			if (target.energy < target.energyCapacity) {
+			if (target.carry.energy < target.carryCapacity) {
 				creep.transferEnergy(target);
 			}
 		}

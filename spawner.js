@@ -1,26 +1,18 @@
 module.exports =
 {
-	initSpawnQue: function()
-	{
-		if(Memory.spawnQue == undefined)
-			Memory.spawnQue = [ ];
-	},
-
 	addToQue: function(creep, unshift)
 	{
-		this.initSpawnQue();
-
+		var curRoom = Game.rooms[Memory.CURRENT_ROOM_NAME];
 		if(unshift != undefined && unshift === true)
-			Memory.spawnQue.unshift(creep);
+			curRoom.memory.spawnQue.unshift(creep);
 		else
-			Memory.spawnQue.push(creep);
+			curRoom.memory.spawnQue.push(creep);
 	},
 
 	spawnNextInQue: function()
 	{
-		this.initSpawnQue();
-
-		if(!Memory.spawnQue.length) 
+		var curRoom = Game.rooms[Memory.CURRENT_ROOM_NAME];
+		if (!curRoom.memory.spawnQue.length)
 			return;
 
 		var spawns = Game.spawns.Spawn1.room.find(FIND_MY_SPAWNS, {
@@ -33,7 +25,7 @@ module.exports =
 		if(!spawns.length) 
 			return;
 
-		var role = Memory.spawnQue[0];
+		var role = curRoom.memory.spawnQue[0];
 
 		if(typeof role == "string")
 		{
@@ -52,7 +44,7 @@ module.exports =
 		toSpawnAt = toSpawnAt[0];
 
 		if (this.spawn(role.type, role.memory, toSpawnAt)) {
-			Memory.spawnQue.shift();
+			curRoom.memory.spawnQue.shift();
 		}
 	},
 

@@ -3,10 +3,6 @@ var countType = require('countType');
 module.exports ={
 	init: function()
 	{
-		if(Memory.factoryInit != undefined)
-			return;
-
-		Memory.factoryInit = true;
 		this.memory();
 	},
 
@@ -16,16 +12,17 @@ module.exports ={
 	},
 
 	memory: function() {
-		if(Memory.spawnQue == undefined)
-			Memory.spawnQue = [ ];
+        var curRoom = Game.rooms[Memory.CURRENT_ROOM_NAME];
 
-		if(Memory.sources == undefined)
-			Memory.sources = { };
+        if (curRoom.memory.spawnQue == undefined)
+            curRoom.memory.spawnQue = [];
 
-		if(Memory.requiredScreeps == undefined)
+        if (curRoom.memory.sources == undefined)
+            curRoom.memory.sources = {};
+
+        if (Game.time % 10 == 0)
 		{
-			Memory.requiredScreeps = [
-				//Survival
+            curRoom.memory.requiredScreeps = [
 				'harvester',
 				'guard', //1
 				'miner', //1
@@ -33,40 +30,23 @@ module.exports ={
 				'guard', //2
 				'healer', //1
 				'guard', //3
-				'miner', //3
 				'builder',
+                'ctl_builder',
 				'transporter',
 				'transporter',
 				'guard', //4
 				'healer', //2
-				'guard', //5
-				'guard', //6
-				'miner', //4
-				'guard', //7
-				'guard', //8
-				'guard', //9
-				'healer', //3
-				'miner', //5
 				'builder',
 				'transporter',
 				'transporter',
-				'guard', //10
-				'guard', //11
-				'healer' //4
-
-				//Tutorial
-//				'miner',
-//				'miner',
-//				'miner',
-//				'miner',
-//				'miner',
 			];
 		}
 	},
 
 	spawnRequiredScreeps: function()
 	{
-		var requiredScreeps = Memory.requiredScreeps;
+        var curRoom = Game.rooms[Memory.CURRENT_ROOM_NAME];
+        var requiredScreeps = curRoom.memory.requiredScreeps;
 
 		var gatheredScreeps = { };
 		for(var index in requiredScreeps)
@@ -80,7 +60,7 @@ module.exports ={
 			var found = countType(type, true);
 			if(neededToSkip > countType(type, true))
 			{
-				Memory.spawnQue.push(type);
+                curRoom.memory.spawnQue.push(type);
 			}
 
 			gatheredScreeps[type]++;
@@ -89,10 +69,11 @@ module.exports ={
 
 	buildArmyWhileIdle: function()
 	{
+        var curRoom = Game.rooms[Memory.CURRENT_ROOM_NAME];
 		for(var i in Game.spawns)
 		{
 			var spawn = Game.spawns[i];
-			if(!spawn.spawning && Memory.spawnQue.length == 0 && spawn.energy / spawn.energyCapacity >= .6) {
+            if (!spawn.spawning && curRoom.memory.spawnQue.length == 0 && spawn.energy / spawn.energyCapacity >= .6) {
 				var archers = countType('archer', true);
 				var healers = countType('healer', true);
 

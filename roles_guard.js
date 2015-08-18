@@ -11,6 +11,7 @@ var guard = {
 	action: function()
 	{
 		var creep = this.creep;
+        var curRoom = Game.rooms[Memory.CURRENT_ROOM_NAME];
 
         var targets = creep.room.find(FIND_HOSTILE_CREEPS, {
             filter: function (i) {

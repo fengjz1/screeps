@@ -78,39 +78,28 @@ var proto = {
 	 * All credit goes to Djinni
 	 * @url https://bitbucket.org/Djinni/screeps/
 	 */
-	rest: function(civilian)
+	rest: function ()
 	{
 		var creep = this.creep;
+		var curRoom = Game.rooms[Memory.CURRENT_ROOM_NAME];
 
-		var distance = 4;
-		var restTarget = creep.pos.findClosest(FIND_MY_SPAWNS);
+		var onRestPoint = false;
+		creep.pos.lookFor("flag").forEach(function (obj) {
+			if (obj.color == COLOR_YELLOW) onRestPoint = true;
+		});
+		if (onRestPoint) return;
 
-		if(!civilian) {
-			var flags = Game.flags;
-			for (var i in flags) {
-				var flag = flags[i];
-				if (creep.pos.inRangeTo(flag, distance) || creep.pos.findPathTo(flag).length > 0) {
-					restTarget = flag;
-					break;
+		var restPoints = curRoom.find(FIND_FLAGS, {
+			filter: function (obj) {
+				if (obj.color == COLOR_YELLOW && !obj.pos.lookFor("creep").length) {
+					return true;
 				}
+				return false;
 			}
-		}
+		});
 
-//		var flag = Game.flags['Flag1'];
-//		if(flag !== undefined && civilian !== true)
-//			restTarget = flag;
-//
-//		var flag2 = Game.flags['Flag2'];
-//		if(flag !== undefined && civilian !== true && !creep.pos.inRangeTo(flag, distance) && !creep.pos.findPathTo(flag).length)
-//			restTarget = flag2;
-
-		if (creep.getActiveBodyparts(HEAL)) {
-//			distance = distance - 1;
-		}
-		else if (creep.getActiveBodyparts(RANGED_ATTACK)) {
-//			distance = distance - 1;
-		}
-		if (creep.pos.findPathTo(restTarget).length > distance) {
+		if (restPoints.length) {
+			var restTarget = restPoints[0];
 			creep.moveTo(restTarget);
 		}
 	},

@@ -1,6 +1,6 @@
 var performRoles = require('performRoles');
 var spawner = require('spawner');
-var countType = require('countType');
+var roomManager = require('roomManager');
 var factory = require('factory');
 
 Memory.CURRENT_ROOM_NAME = Game.spawns.Spawn1.room.name;
@@ -8,8 +8,10 @@ Memory.CURRENT_ROOM_NAME = Game.spawns.Spawn1.room.name;
 factory.init();
 factory.run();
 
+roomManager.run();
+
 spawner.spawnNextInQue();
 
-factory.buildArmyWhileIdle();
+//factory.buildArmyWhileIdle();
 
 performRoles(Game.creeps);

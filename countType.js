@@ -4,9 +4,9 @@ module.exports = function(type, qued)
 		qued = false;
 
 	//Get the current room, then find all creeps in that room by their role
-	var room = Game.spawns.Spawn1.room;
+	var curRoom = Game.rooms[Memory.CURRENT_ROOM_NAME];
 
-	var count = room.find(FIND_MY_CREEPS, {
+	var count = curRoom.find(FIND_MY_CREEPS, {
 		filter: function(creep)
 		{
 			if(creep.memory.role == type)
@@ -30,9 +30,7 @@ module.exports = function(type, qued)
 			}
 		}
 
-
-
-		count += Memory.spawnQue.filter(function(qued)
+		count += curRoom.memory.spawnQue.filter(function (qued)
 		{
 			return qued == type;
 		}).length;

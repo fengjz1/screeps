@@ -50,6 +50,7 @@ var helper = {
 		var miner = Game.getObjectById(creep.memory.miner);
 
 		if (miner == null) {
+            console.log("miner helper suicide," + JSON.stringify(creep.memory));
 			creep.suicide();
 			return;
 		}
@@ -103,7 +104,7 @@ var helper = {
 				return (
 					possibleTarget.memory.role == creep.memory.role
 //					&& possibleTarget.memory.miner == creep.memory.miner
-					&& possibleTarget.energy < possibleTarget.energyCapacity
+                    && possibleTarget.carry.energy < possibleTarget.carryCapacity
 					&& creep.pos.inRangeTo(possibleTarget, 1)
 					&& (
 					creep.pos.getDirectionTo(possibleTarget) == targetDirection
@@ -122,7 +123,13 @@ var helper = {
 
 		//If we're near to the target, either give it our energy or drop it
 		if (creep.pos.isNearTo(target)) {
-			if (target.energy < target.energyCapacity) {
+            var energyNotFull = false;
+            if (target.structureType && target.structureType == 'spawn') {
+                energyNotFull = (target.energy < target.energyCapacity);
+            } else {
+                energyNotFull = (target.carry.energy < target.carryCapacity)
+            }
+            if (energyNotFull) {
 				creep.transferEnergy(target);
 			}
 			else

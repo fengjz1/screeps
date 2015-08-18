@@ -15,6 +15,7 @@ var miner = {
 	getOpenSource: function()
 	{
 		var creep = this.creep;
+        var curRoom = Game.rooms[Memory.CURRENT_ROOM_NAME];
 
         var source = creep.pos.findClosest(FIND_SOURCES, {
 			filter: function(source)
@@ -31,10 +32,10 @@ var miner = {
                     return false;
                 }
 
-				if(Memory.sources[source.id] == undefined || Memory.sources[source.id].miner == undefined || Memory.sources[source.id].miner == creep.id)
+                if (curRoom.memory.sources[source.id] == undefined || curRoom.memory.sources[source.id].miner == undefined || curRoom.memory.sources[source.id].miner == creep.id)
 					return true;
 
-				if(Game.getObjectById(Memory.sources[source.id].miner) == null)
+                if (Game.getObjectById(curRoom.memory.sources[source.id].miner) == null)
 					return true;
 
 				return false;
@@ -47,14 +48,15 @@ var miner = {
 	setSourceToMine: function(source)
 	{
 		var creep = this.creep;
+        var curRoom = Game.rooms[Memory.CURRENT_ROOM_NAME];
 
 		if(!source)
 			return;
 
-		if(Memory.sources[source.id] == undefined)
-			Memory.sources[source.id] = { id: source.id };
+        if (curRoom.memory.sources[source.id] == undefined)
+            curRoom.memory.sources[source.id] = {id: source.id};
 
-		Memory.sources[source.id].miner = creep.id;
+        curRoom.memory.sources[source.id].miner = creep.id;
 		creep.memory.source = source.id;
 
         var helperSpawn = source.pos.findClosest(FIND_MY_SPAWNS);
@@ -65,7 +67,8 @@ var miner = {
 			creepsNeeded = 5;
 
 		for(var i = 0; i < creepsNeeded; i++)
-			Memory.spawnQue.unshift({ type: 'miner_helper', memory: {
+            curRoom.memory.spawnQue.unshift({
+                type: 'miner_helper', memory: {
 				miner: creep.id
 			}});
 
@@ -88,6 +91,7 @@ var miner = {
 	action: function()
 	{
 		var creep = this.creep;
+        var curRoom = Game.rooms[Memory.CURRENT_ROOM_NAME];
 
 		//Basically, each miner can empty a whole source by themselves. Also, since they're slow, we don't have them
 		//moving away from the source when it's empty, it'd regenerate before they got to another one.
@@ -108,10 +112,10 @@ var miner = {
 		else
 			creep.memory.isNearSource = false;
 
-		if(Memory.sources[source.id] == undefined)
-			Memory.sources[source.id] = { id: source.id };
+        if (curRoom.memory.sources[source.id] == undefined)
+            curRoom.memory.sources[source.id] = {id: source.id};
 
-		Memory.sources[source.id].miner = creep.id;
+        curRoom.memory.sources[source.id].miner = creep.id;
 
 		creep.moveTo(source);
 		creep.harvest(source);

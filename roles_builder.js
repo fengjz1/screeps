@@ -1,6 +1,6 @@
 /**
  * @TODO: Make it more carry heavy, make it have helpers
- * @type {{parts: *[], getParts: getParts, action: action}}
+ * @type {{parts: *[], action: action}}
  */
 var builder = {
 	parts: [
@@ -86,7 +86,7 @@ var builder = {
 
 			//Next we're going to look for general buildings that have less than 50% health, and we'll go to repair those.
 			//We set it at 50%, because we don't want builders abandoning their duty every time a road gets walked on
-			var halfBroken = creep.room.find(STRUCTURES);
+            var halfBroken = creep.room.find(FIND_MY_STRUCTURES);
 			var toRepair = [ ];
 			for(var index in halfBroken)
 				if((halfBroken[index].hits / halfBroken[index].hitsMax) < 0.5)
@@ -104,12 +104,13 @@ var builder = {
 			//If no repairs are needed, we're just going to go find some structures to build
 			var targets = creep.pos.findClosest(FIND_CONSTRUCTION_SITES);
 			if(targets) {
-
 				if(!creep.pos.isNearTo(targets))
 					creep.moveTo(targets);
 
-				if(creep.pos.inRangeTo(targets, 0))
+                if (creep.pos.inRangeTo(targets, 0)) {
+                    console.log("builder suicide:" + JSON.stringify(creep.memory));
 					creep.suicide();
+                }
 
 				creep.build(targets);
 				return;

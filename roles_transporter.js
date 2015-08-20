@@ -1,6 +1,7 @@
 var transporter = {
 	parts: [
-		[CARRY, CARRY, MOVE, MOVE]
+        [CARRY, CARRY, MOVE, MOVE],
+        [CARRY, CARRY, MOVE, MOVE, CARRY, CARRY, MOVE, MOVE],
 	],
 
 	action: function()
@@ -12,12 +13,7 @@ var transporter = {
 
 		if (creep.carry.energy == 0)
 		{
-			var closestSpawn = creep.pos.findClosest(FIND_MY_SPAWNS, {
-				filter: function(spawn)
-				{
-					return spawn.energy > creep.carryCapacity;
-				}
-			});
+            var closestSpawn = creep.pos.findClosestByRange(FIND_MY_SPAWNS);
 
 			//pickup dropped energy near spawn
 			if (closestSpawn) {
@@ -25,7 +21,7 @@ var transporter = {
 				if (drops.length > 0) {
 					creep.moveTo(drops[0]);
 					creep.pickup(drops[0]);
-                } else if (curRoom.memory.spawnQue.length <= 0) {	//Do not build anything when spawning units
+                } else if (closestSpawn.energy > creep.carryCapacity) {
 					creep.moveTo(closestSpawn);
 					closestSpawn.transferEnergy(creep);
 				}
@@ -37,20 +33,20 @@ var transporter = {
 		var target = null;
 
 		if (!target) {
-			var extension = creep.pos.findClosest(FIND_MY_STRUCTURES, {
+            var extension = creep.room.find(FIND_MY_STRUCTURES, {
 				filter: function (structure) {
 					return structure.structureType == STRUCTURE_EXTENSION &&
 						structure.energy < structure.energyCapacity;
 				}
 			});
 
-			if (extension)
-				target = extension;
+            if (extension && extension.length > 0)
+                target = extension[0];
 		}
 
 		//Transfer to builder
 		if (!target) {
-			var builderToHelp = creep.pos.findClosest(FIND_MY_CREEPS, {
+            var builderToHelp = creep.pos.findClosestByRange(FIND_MY_CREEPS, {
 				filter: function (builder) {
 					return builder.memory.role == "builder"
                         && builder.carry.energy / builder.carryCapacity < 0.5;
@@ -61,7 +57,7 @@ var transporter = {
 				target = builderToHelp;
 		}
 		if (!target) {
-			var builderToHelp = creep.pos.findClosest(FIND_MY_CREEPS, {
+            var builderToHelp = creep.pos.findClosestByRange(FIND_MY_CREEPS, {
 				filter: function (builder) {
 					return builder.memory.role == "ctl_builder"
 						&& builder.carry.energy < ( builder.carryCapacity - 10);

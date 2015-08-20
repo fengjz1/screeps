@@ -4,12 +4,10 @@
  */
 var builder = {
 	parts: [
-		[WORK, WORK, CARRY, MOVE],
-		[WORK, WORK, CARRY, CARRY, MOVE, MOVE, CARRY],
-		[WORK, WORK, CARRY, CARRY, MOVE, MOVE, CARRY, MOVE],
-		[WORK, WORK, CARRY, CARRY, MOVE, MOVE, CARRY, MOVE, WORK],
-		[WORK, WORK, CARRY, CARRY, MOVE, MOVE, CARRY, MOVE, WORK, MOVE],
-		[WORK, WORK, CARRY, CARRY, MOVE, MOVE, CARRY, MOVE, WORK, MOVE, CARRY]
+        [WORK, WORK, CARRY, MOVE], //300
+        [WORK, WORK, CARRY, CARRY, MOVE, MOVE], //400
+        [WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE], //600
+        [WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE], //800
 	],
 
 //	getParts: function()
@@ -58,31 +56,79 @@ var builder = {
 			}
 		}
 		else {
+            //extensions/walls build first
+            var target = creep.pos.findClosest(FIND_CONSTRUCTION_SITES, {
+                filter: {structureType: STRUCTURE_EXTENSION}
+            });
+            if (!target) {
+                target = creep.pos.findClosest(FIND_CONSTRUCTION_SITES, {
+                    filter: {structureType: STRUCTURE_WALL}
+                });
+            }
+            if (target) {
+                if (!creep.pos.isNearTo(target))
+                    creep.moveTo(target);
+
+                if (creep.pos.inRangeTo(target, 0)) {
+                    console.log("builder suicide:" + JSON.stringify(creep.memory));
+                    creep.suicide();
+                }
+
+                creep.build(target);
+                return;
+            }
+
 			//First, we're going to check for damaged ramparts. We're using ramparts as the first line of defense
 			//and we want them nicely maintained. This is especially important when under attack. The builder will
 			//repair the most damaged ramparts first
-			var structures = creep.room.find(FIND_STRUCTURES);
-			var damagedRamparts = [ ];
+            var ramparts = creep.room.find(FIND_STRUCTURES, {
+                filter: {structureType: STRUCTURE_RAMPART, needRepair: true}
+            });
 
-			for(var index in structures)
+            ramparts.sort(function (a, b) {
+                return a.hitsBuildTarget - b.hitsBuildTarget;
+            });
+
+            if (ramparts.length)
 			{
-				var structure = structures[index];
-				if(structure.structureType == 'rampart' && structure.hits < (structure.hitsMax - 50))
-					damagedRamparts.push(structure);
-			}
-
-			damagedRamparts.sort(function(a, b)
-			{
-				return(a.hits - b.hits);
-			});
-
-			if(damagedRamparts.length)
-			{
-				creep.moveTo(damagedRamparts[0]);
-				creep.repair(damagedRamparts[0]);
-
+                if (!creep.pos.isNearTo(ramparts[0]))
+                    creep.moveTo(ramparts[0]);
+                creep.repair(ramparts[0]);
 				return;
 			}
+
+            //when no ramparts to repair, try build new ramparts
+            var target = creep.pos.findClosest(FIND_CONSTRUCTION_SITES, {
+                filter: {structureType: STRUCTURE_RAMPART}
+            });
+            if (target) {
+                if (!creep.pos.isNearTo(target))
+                    creep.moveTo(target);
+
+                if (creep.pos.inRangeTo(target, 0)) {
+                    console.log("builder suicide:" + JSON.stringify(creep.memory));
+                    creep.suicide();
+                }
+
+                creep.build(target);
+                return;
+            }
+
+            //try repair walls
+            var ramparts = creep.room.find(FIND_STRUCTURES, {
+                filter: {structureType: STRUCTURE_WALL, needRepair: true}
+            });
+
+            ramparts.sort(function (a, b) {
+                return a.hitsBuildTarget - b.hitsBuildTarget;
+            });
+
+            if (ramparts.length) {
+                creep.moveTo(ramparts[0]);
+                creep.repair(ramparts[0]);
+
+                return;
+            }
 
 			//Next we're going to look for general buildings that have less than 50% health, and we'll go to repair those.
 			//We set it at 50%, because we don't want builders abandoning their duty every time a road gets walked on

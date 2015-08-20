@@ -35,7 +35,7 @@ module.exports = {
 				pos = [x, rightDownPos[1]];
 				this.innerBuildExtension(curRoom, pos);
 			}
-			for (var y = leftDownPos[1]; y < leftUpPos[1]; y -= 2) {
+			for (var y = leftDownPos[1]; y > leftUpPos[1]; y -= 2) {
 				pos = [leftDownPos[0], y];
 				this.innerBuildExtension(curRoom, pos);
 			}
@@ -48,23 +48,54 @@ module.exports = {
 	},
 
 	innerBuildExtension: function (room, pos) {
-		if (pos.x >= 4 && pos.x <= 45 && pos.y >= 0 && pos.y <= 45)
-			room.createConstructionSite(pos.x, pos.y, STRUCTURE_EXTENSION);
+		if (pos[0] >= 4 && pos[0] <= 45 && pos[1] >= 4 && pos[1] <= 45)
+			room.createConstructionSite(pos[0], pos[1], STRUCTURE_EXTENSION);
 	},
 
-	buildWalls: function () {
+	buildWallAndRampart: function () {
 		var curRoom = Game.rooms[Memory.CURRENT_ROOM_NAME];
 
+		var spawns = curRoom.find(FIND_MY_SPAWNS);
+		if (spawns.length == 0) return;
 		if (!curRoom.controller || curRoom.controller.level < 2) return;
-		var exits = curRoom.find(FIND_EXIT);
-		for (var i in exits) {
-			var exit = exits[i];
-			if (exit.x == 0) curRoom.createConstructionSite(exit.x + 2, exit.y, STRUCTURE_WALL);
-			if (exit.y == 0) curRoom.createConstructionSite(exit.x, exit.y + 2, STRUCTURE_WALL);
-			if (exit.x == 49) curRoom.createConstructionSite(exit.x - 2, exit.y, STRUCTURE_WALL);
-			if (exit.y == 49) curRoom.createConstructionSite(exit.x, exit.y - 2, STRUCTURE_WALL);
-		}
 
+		var exits = curRoom.find(FIND_EXIT);
+		//check one path per tick
+		var exit = exits[Game.time % exits.length];
+		var exitPos = curRoom.getPositionAt(exit.x, exit.y);
+		var avoidArr = [];
+		var constructionSites = curRoom.find(FIND_CONSTRUCTION_SITES);
+		var structures = curRoom.find(FIND_STRUCTURES);
+		avoidArr = avoidArr.concat(constructionSites, structures);
+		var path = curRoom.findPath(spawns[0].pos, exitPos, {
+			ignoreCreeps: true,
+			heuristicWeight: 100,
+			avoid: avoidArr,
+			maxOps: 200,
+		});
+		for (var i in path) {
+			var pos = curRoom.getPositionAt(path[i].x, path[i].y);
+			if ((pos.x == 2 || pos.x == 47 || pos.y == 2 || pos.y == 47) && (pos.x >= 2 && pos.x <= 47 && pos.y >= 2 && pos.y <= 47)) {
+				//If near terrain walls, build rampart. If not, build wall.
+				var nearWall = false;
+				var areaObjs = curRoom.lookForAtArea("terrain", pos.y - 2, pos.x - 2, pos.y + 2, pos.x + 2);
+				for (var i in areaObjs) {
+					for (var j in areaObjs[i]) {
+						if (areaObjs[i][j]) {
+							areaObjs[i][j].forEach(function (tmpObj) {
+								if (tmpObj == "wall") nearWall = true;
+							});
+						}
+						if (nearWall) break;
+					}
+					if (nearWall) break;
+				}
+				if (nearWall)
+					curRoom.createConstructionSite(pos.x, pos.y, STRUCTURE_RAMPART);
+				else
+					curRoom.createConstructionSite(pos.x, pos.y, STRUCTURE_WALL);
+			}
+		}
 	},
 
 	buildRoads: function(from, to)

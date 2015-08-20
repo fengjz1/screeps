@@ -14,7 +14,7 @@ var helper = {
 	assignMiner: function () {
 		var creep = this.creep;
 
-		var miner = creep.pos.findClosest(FIND_MY_CREEPS, {
+        var miner = creep.pos.findClosestByRange(FIND_MY_CREEPS, {
 			filter: function (miner) {
 				if (miner.memory.role == 'miner' && miner.memory.helpers.length < miner.memory.helpersNeeded)
 					return true;
@@ -74,52 +74,52 @@ var helper = {
 		//Okay, everything below is for dropping energy off
 
 		if (!target) {
-			var spawn = creep.pos.findClosest(FIND_MY_SPAWNS);
+            var spawn = creep.pos.findClosestByRange(FIND_MY_SPAWNS);
 
 			//If we found it, set it as our target
 			if (spawn)
 				target = spawn;
 		}
 
-		//Let's get the direction we want to go in
-		var targetDirection = creep.pos.findPathTo(target, { ignoreCreeps: true })[0].direction;
-
-		//Let's look for a courier in that direction. We'll check on making sure they're the right
-		//role, if they can hold any energy, if they're in range and if they're in the same direction
-		var leftDir = targetDirection - 1;
-		var rightDir = targetDirection + 1;
-
-		if (leftDir < 1)
-			leftDir += 8;
-		if (leftDir > 8)
-			leftDir -= 8;
-
-		if (rightDir < 1)
-			rightDir += 8;
-		if (rightDir > 8)
-			rightDir -= 8;
-
-		var courier = creep.pos.findClosest(FIND_MY_CREEPS, {
-			filter: function (possibleTarget) {
-				return (
-					possibleTarget.memory.role == creep.memory.role
-//					&& possibleTarget.memory.miner == creep.memory.miner
-                    && possibleTarget.carry.energy < possibleTarget.carryCapacity
-					&& creep.pos.inRangeTo(possibleTarget, 1)
-					&& (
-					creep.pos.getDirectionTo(possibleTarget) == targetDirection
-					|| creep.pos.getDirectionTo(possibleTarget) == leftDir
-					|| creep.pos.getDirectionTo(possibleTarget) == rightDir
-					)
-					);
-			}
-		});
-
-		//If we found a courier, make that courier our new target
-		if (courier !== null && !creep.pos.isNearTo(target)) {
-			target = courier;
-			target.memory.courier = true;
-		}
+//		//Let's get the direction we want to go in
+//		var targetDirection = creep.pos.findPathTo(target, { ignoreCreeps: true })[0].direction;
+//
+//		//Let's look for a courier in that direction. We'll check on making sure they're the right
+//		//role, if they can hold any energy, if they're in range and if they're in the same direction
+//		var leftDir = targetDirection - 1;
+//		var rightDir = targetDirection + 1;
+//
+//		if (leftDir < 1)
+//			leftDir += 8;
+//		if (leftDir > 8)
+//			leftDir -= 8;
+//
+//		if (rightDir < 1)
+//			rightDir += 8;
+//		if (rightDir > 8)
+//			rightDir -= 8;
+//
+//		var courier = creep.pos.findClosestByRange(FIND_MY_CREEPS, {
+//			filter: function (possibleTarget) {
+//				return (
+//					possibleTarget.memory.role == creep.memory.role
+////					&& possibleTarget.memory.miner == creep.memory.miner
+//                    && possibleTarget.carry.energy < possibleTarget.carryCapacity
+//					&& creep.pos.inRangeTo(possibleTarget, 1)
+//					&& (
+//					creep.pos.getDirectionTo(possibleTarget) == targetDirection
+//					|| creep.pos.getDirectionTo(possibleTarget) == leftDir
+//					|| creep.pos.getDirectionTo(possibleTarget) == rightDir
+//					)
+//					);
+//			}
+//		});
+//
+//		//If we found a courier, make that courier our new target
+//		if (courier !== null && !creep.pos.isNearTo(target)) {
+//			target = courier;
+//			target.memory.courier = true;
+//		}
 
 		//If we're near to the target, either give it our energy or drop it
 		if (creep.pos.isNearTo(target)) {

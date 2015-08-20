@@ -2,9 +2,62 @@
  * Created by jingzhe.feng on 2015-08-18.
  */
 module.exports = {
+    init: function () {
+        var curRoom = Game.rooms[Memory.CURRENT_ROOM_NAME];
+
+        //update wall/rampart hitsBuildTarget
+        var BUILD_UNIT = 50000; //buildUnit = 50k
+        var structures = curRoom.find(FIND_STRUCTURES);
+        if (!curRoom.memory.structures) curRoom.memory.structures = {};
+        structures.forEach(function (structure) {
+            if (structure.structureType == STRUCTURE_RAMPART || structure.structureType == STRUCTURE_WALL) {
+                if (!curRoom.memory.structures[structure.id]) curRoom.memory.structures[structure.id] = {};
+                if (structure.hitsMax < 10) return;  //deal with exceptional ramparts data 20150820
+                var mem = curRoom.memory.structures[structure.id];
+                if (typeof mem.needRepair == "undefined") {
+                    if (structure.hits / structure.hitsMax < 0.5) {
+                        mem.needRepair = true;
+                        mem.hitsBuildTarget = (Math.floor(structure.hits / BUILD_UNIT) + 2) * BUILD_UNIT;
+                    } else {
+                        mem.needRepair = false;
+                        mem.hitsBuildTarget = structure.hitsMax;
+                    }
+                    //if(mem.hitsBuildTarget == 1){
+                    //    console.log(JSON.stringify(structure));
+                    //    Game.notify(JSON.stringify(structure));
+                    //}
+                }
+                //update
+                if (structure.hits > mem.hitsBuildTarget) {
+                    if (structure.hits / structure.hitsMax < 0.5) {
+                        mem.needRepair = true;
+                        mem.hitsBuildTarget = (Math.floor(structure.hits / BUILD_UNIT) + 2) * BUILD_UNIT;
+                    } else {
+                        mem.needRepair = false;
+                        mem.hitsBuildTarget = structure.hitsMax;
+                    }
+                } else if (structure.hits / structure.hitsMax < 0.5) {
+                    var newBuildTarget = (Math.floor(structure.hits / BUILD_UNIT) + 2) * BUILD_UNIT;
+                    if (newBuildTarget < mem.hitsBuildTarget) {
+                        mem.needRepair = true;
+                        mem.hitsBuildTarget = newBuildTarget;
+                    }
+                }
+
+                structure.needRepair = mem.needRepair;
+                structure.hitsBuildTarget = mem.hitsBuildTarget;
+                //console.log(JSON.stringify(curRoom.memory.structures[structure.id]));
+            }
+        });
+
+
+    },
 
     run: function () {
         var curRoom = Game.rooms[Memory.CURRENT_ROOM_NAME];
+
+        //room object status init/update
+        this.init();
 
         //build rest flag
         if (!curRoom.memory.restFlagSet) {
@@ -69,11 +122,11 @@ module.exports = {
             }
         }
 
-        //try construction every 100 ticks
+        //construction
+        var constructionPlanner = require('constructionPlanner');
+        constructionPlanner.buildWallAndRampart();
         if (Game.time % 100 == 0) {
-            var constructionPlanner = require('constructionPlanner');
             constructionPlanner.buildExtentions();
-            constructionPlanner.buildWalls();
         }
     },
 

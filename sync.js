@@ -41,6 +41,8 @@ function refreshLocalBranch() {
     modules = {};
     fs.readdirSync('.').forEach(function(file) {
         if (file !== 'sync.js' && /\.js$/.test(file)) {
+            var moduleName = file.replace(/\.js$/, '');
+            console.log("var preload_" + moduleName + " = require('" + moduleName + "');");
             modules[file.replace( /\.js$/, '')] = crush(branch, file, fs.readFileSync(file, 'utf8'));
         }
     });

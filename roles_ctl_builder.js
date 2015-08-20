@@ -3,8 +3,11 @@
  */
 var builder = {
     parts: [
-        [WORK, WORK, CARRY, MOVE],
-        [WORK, WORK, WORK, CARRY, MOVE],
+        [WORK, WORK, CARRY, MOVE], //300
+        [WORK, WORK, WORK, CARRY, MOVE], //400
+        [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE], //600
+        [WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE], //700
+        [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE], //800
     ],
 
     action: function () {

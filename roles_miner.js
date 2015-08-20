@@ -17,7 +17,7 @@ var miner = {
 		var creep = this.creep;
         var curRoom = Game.rooms[Memory.CURRENT_ROOM_NAME];
 
-        var source = creep.pos.findClosest(FIND_SOURCES, {
+        var source = creep.pos.findClosestByRange(FIND_SOURCES, {
 			filter: function(source)
 			{
                 var sourceKeepers = source.pos.findInRange(FIND_HOSTILE_STRUCTURES, 10, {

@@ -28,7 +28,8 @@ timeArray.push(Game.getUsedCpu());
 spawner.spawnNextInQue();
 timeArray.push(Game.getUsedCpu());
 
-//factory.buildArmyWhileIdle();
+factory.buildWhileIdle();
+timeArray.push(Game.getUsedCpu());
 
 performRoles(curRoom.find(FIND_MY_CREEPS));
 timeArray.push(Game.getUsedCpu());
@@ -57,4 +58,6 @@ function preloadAllModules() {
     var preload_role_prototype = require('role_prototype');
     var preload_roomManager = require('roomManager');
     var preload_spawner = require('spawner');
+
+    var _ = require("lodash");
 }

@@ -1,7 +1,8 @@
 module.exports = function(creeps)
 {
-	var roleManager = require('roleManager');
 	var beginTime = Game.getUsedCpu();
+    var roleManager = require('roleManager');
+    var curRoom = Game.rooms[Memory.CURRENT_ROOM_NAME];
 
 	//For each creep, check if they have a role. If they do, load and run it
 	for (var idx in creeps)
@@ -12,6 +13,13 @@ module.exports = function(creeps)
 			continue;
 
 		var role = creep.memory.role;
+        //temporary skip
+        if (role == "transporter" || role == "builder") {
+            creep.usedTime = 0;
+            creep.createCostTime = 0;
+            creep.runTime = 0;
+            continue;
+        }
 
 		if(roleManager.roleExists(role))
 			role = roleManager.getRole(role);
@@ -26,6 +34,25 @@ module.exports = function(creeps)
 		creep.createCostTime = end1 - begin;
 		creep.runTime = end2 - end1;
 	}
+
+    //task queue roles
+    var taskQueueRoles = ["transporter", "builder"];
+    for (var idx in taskQueueRoles) {
+        var role;
+        var roleName = taskQueueRoles[idx];
+        if (roleManager.roleExists(roleName))
+            role = roleManager.getRole(roleName);
+        role = Object.create(role);
+        var taskQueue = role.generateTaskQueue();
+        curRoom.memory["taskQueue_" + roleName] = taskQueue;
+        //record queue length history
+        if (!curRoom.memory["taskQueueLengthHistory_" + roleName]) curRoom.memory["taskQueueLengthHistory_" + roleName] = [];
+        var lenHis = curRoom.memory["taskQueueLengthHistory_" + roleName];
+        lenHis.push(taskQueue.length);
+        if (lenHis.length > 200) curRoom.memory["taskQueueLengthHistory_" + roleName] = lenHis.slice(-100);
+        role.processTaskQueue(taskQueue);
+    }
+
 
 	var maxTime = 0, maxName;
 	for (var idx in creeps) {

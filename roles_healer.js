@@ -6,9 +6,9 @@ var proto = require('role_prototype');
 
 var healer = {
 	parts: [
-        [MOVE, HEAL],
-		[MOVE, MOVE, HEAL, HEAL],
-		[MOVE, MOVE, MOVE, HEAL, HEAL, HEAL]
+        [MOVE, HEAL], //300
+        [MOVE, MOVE, HEAL, HEAL], //600
+        [MOVE, MOVE, MOVE, HEAL, HEAL, HEAL], //900
 	],
 
 	action: function()

@@ -37,6 +37,187 @@ var builder = {
 //		return this.prototype.getParts.call(this);
 //	},
 
+    generateTaskQueue: function () {
+        var curRoom = Game.rooms[Memory.CURRENT_ROOM_NAME];
+        var taskQueue = [];
+        var idx;
+
+        //extensions/walls build first
+        var extentionSites = curRoom.find(FIND_CONSTRUCTION_SITES, {
+            filter: {structureType: STRUCTURE_EXTENSION}
+        });
+        for (idx in extentionSites) {
+            var obj = extentionSites[idx];
+            taskQueue.push({
+                target: obj.id,
+                targetType: "CONSTRUCTION_SITES",
+                canSeize: true,
+                unseizable: false,
+                priority: 100
+            });
+        }
+
+        var wallSites = curRoom.find(FIND_CONSTRUCTION_SITES, {
+            filter: {structureType: STRUCTURE_WALL}
+        });
+        for (idx in wallSites) {
+            var obj = wallSites[idx];
+            taskQueue.push({
+                target: obj.id,
+                targetType: "CONSTRUCTION_SITES",
+                canSeize: false,
+                unseizable: false,
+                priority: 90
+            });
+        }
+
+        //Then we're going to check for damaged ramparts. We're using ramparts as the first line of defense
+        //and we want them nicely maintained. This is especially important when under attack. The builder will
+        //repair the most damaged ramparts first
+        var ramparts = curRoom.find(FIND_STRUCTURES, {
+            filter: {structureType: STRUCTURE_RAMPART, needRepair: true}
+        });
+
+        ramparts.sort(function (a, b) {
+            return a.hitsBuildTarget - b.hitsBuildTarget;
+        });
+
+        for (idx in ramparts) {
+            var obj = ramparts[idx];
+            taskQueue.push({target: obj.id, targetType: "STRUCTURE", canSeize: false, unseizable: false, priority: 80});
+        }
+
+
+        //when no ramparts to repair, try build new ramparts
+        var rampartSites = curRoom.find(FIND_CONSTRUCTION_SITES, {
+            filter: {structureType: STRUCTURE_RAMPART}
+        });
+        for (idx in rampartSites) {
+            var obj = rampartSites[idx];
+            taskQueue.push({
+                target: obj.id,
+                targetType: "CONSTRUCTION_SITES",
+                canSeize: false,
+                unseizable: false,
+                priority: 70
+            });
+        }
+
+        //try repair walls
+        var walls = curRoom.find(FIND_STRUCTURES, {
+            filter: {structureType: STRUCTURE_WALL, needRepair: true}
+        });
+        walls.sort(function (a, b) {
+            return a.hitsBuildTarget - b.hitsBuildTarget;
+        });
+        for (idx in walls) {
+            var obj = walls[idx];
+            taskQueue.push({target: obj.id, targetType: "STRUCTURE", canSeize: false, unseizable: false, priority: 60});
+        }
+
+        //If no repairs are needed, we're just going to go find some structures to build
+        var allSites = curRoom.find(FIND_CONSTRUCTION_SITES);
+        for (idx in allSites) {
+            var obj = allSites[idx];
+            taskQueue.push({
+                target: obj.id,
+                targetType: "CONSTRUCTION_SITES",
+                canSeize: false,
+                unseizable: false,
+                priority: 50
+            });
+        }
+
+        return taskQueue;
+    },
+
+
+    processTaskQueue: function (taskQueue) {
+        var curRoom = Game.rooms[Memory.CURRENT_ROOM_NAME];
+        var _ = require("lodash");
+
+        //find builders available
+        var builders = curRoom.find(FIND_MY_CREEPS, {
+            filter: function (creeps) {
+                return creeps.memory.role == "builder";
+            }
+        });
+
+        //do task, update current builder status.
+        //if task=constructionSite check if targetInvalid
+        //if task=structure check if needRepair
+        //check if target invalid.
+        builders.forEach(function (creep) {
+            if (creep.memory.task) {
+                var target = Game.getObjectById(creep.memory.task.target);
+                if (target) {
+                    if (creep.memory.task.targetType == "STRUCTURE") { //is structure
+                        if (target.needRepair) {
+                            if (!creep.pos.isNearTo(target))
+                                creep.moveTo(target);
+                            creep.repair(target);
+                        } else {
+                            creep.memory.task = null;
+                        }
+                    } else if (creep.memory.task.targetType == "CONSTRUCTION_SITES") { //is creep
+                        if (!creep.pos.isNearTo(target))
+                            creep.moveTo(target);
+                        creep.build(target);
+                    } else {
+                        console.log("builder processTaskQueue invalid targetType, task=" + JSON.stringify(creep.memory.task));
+                    }
+                } else {
+                    creep.memory.task = null;
+                }
+            } else {
+                this.creep = creep;
+                this.rest();
+            }
+        }, this);
+
+        //assign task to builders
+        for (var idx in taskQueue) {
+            var task = taskQueue[idx];
+            var workingOnTaskBuilders = _.filter(builders, function (creep) {
+                if (!creep.memory.task) return false;
+                if (creep.memory.task.target == task.target) return true;
+                return false;
+            });
+            if (workingOnTaskBuilders.length) continue; //task currently be working on. do not need to assign
+
+            var freeBuilders = _.filter(builders, function (creep) {
+                return !creep.memory.task;
+            });
+            if (freeBuilders.length) {
+                //determine which transporter should be used. 1.builder near target
+                var target = Game.getObjectById(task.target);
+                var trans = target.pos.findClosestByRange(freeBuilders);
+                if (trans) { //assign task
+                    trans.memory.task = task;
+                    continue;
+                }
+            }
+
+            //no free trans available, check task can seize
+            if (task.canSeize) {
+                var buildersSeizable = _.filter(builders, function (creep) {
+                    return !creep.memory.task.unseizable;
+                });
+                //find lowest priority
+                if (buildersSeizable.length > 1) {
+                    buildersSeizable.sort(function (a, b) {
+                        return a.priority - b.priority;
+                    });
+                }
+                if (buildersSeizable.length) {
+                    buildersSeizable[0].memory.task = task;
+                    continue;
+                }
+            }
+        }
+    },
+
+
 	action: function()
 	{
 		var creep = this.creep;

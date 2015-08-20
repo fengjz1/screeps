@@ -75,6 +75,20 @@ var proto = {
 	beforeAge: function() { },
 
 	/**
+	 * generate task queue
+	 * 1. each tick run once for each role
+	 * 2. queue contains priority sorted tasks
+	 * 3. task with canSeize==true can seize other creeps with lower priority task except when they are carrying unseizable==true task
+	 *
+	 * @returns task queue as array
+	 */
+	generateTaskQueue: function () {
+	},
+
+	processTaskQueue: function (taskQueue) {
+	},
+
+	/**
 	 * All credit goes to Djinni
 	 * @url https://bitbucket.org/Djinni/screeps/
 	 */

@@ -50,7 +50,7 @@ var helper = {
 		var miner = Game.getObjectById(creep.memory.miner);
 
 		if (miner == null) {
-            console.log("miner helper suicide," + JSON.stringify(creep.memory));
+            //console.log("miner helper suicide," + JSON.stringify(creep.memory));
 			creep.suicide();
 			return;
 		}
